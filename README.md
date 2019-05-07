@@ -37,4 +37,3 @@ This project includes the source code of TensorFlow implementation for our munus
   4.2 run train_CycleIR.py to training. The trained model is saved in the ckpt-dir folder.
 
  If you have any question to use this code, please be feel free to contact me (wmtan14@fudan.edu.cn)
-  
