@@ -16,13 +16,13 @@ This project includes the source code of TensorFlow implementation for our munus
   
   ## 2.2 Software Requirements
       numpy 1.15.4
-	    tensorflow 1.6.0
-	    scipy 1.1.0
-      scikit-learn 0.20.2	
-	    scikit-image 0.14.1
-	    opencv-python 3.3.0.10
-	    matplotlib 3.0.2
-	    pillow 5.3.0
+      tensorflow 1.6.0
+      scipy 1.1.0
+      scikit-learn 0.20.2
+      scikit-image 0.14.1
+      opencv-python 3.3.0.10
+      matplotlib 3.0.2
+      pillow 5.3.0
 	 
 # 3. Installation Guide
   A working version of CUDA, python and tensorflow. This should be easy and simple installation. 
@@ -36,7 +36,6 @@ This project includes the source code of TensorFlow implementation for our munus
   please be careful of the consistency of these names with the code. These may be some changes to make them consistency.
 
   4.1 run test_CycleIR.py to test the images in the "test_image" folder.
-  
   4.2 run train_CycleIR.py to training. The trained model is saved in the ckpt-dir folder.
 
   If you have any question to use this code, please be feel free to contact me (wmtan14@fudan.edu.cn).
