@@ -36,6 +36,7 @@ This project includes the source code of TensorFlow implementation for our munus
   please be careful of the consistency of these names with the code. These may be some changes to make them consistency.
 
   4.1 run test_CycleIR.py to test the images in the "test_image" folder.
+  
   4.2 run train_CycleIR.py to training. The trained model is saved in the ckpt-dir folder.
 
   If you have any question to use this code, please be feel free to contact me (wmtan14@fudan.edu.cn).
