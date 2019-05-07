@@ -1,18 +1,18 @@
-# Cycle-IR
+# Cycle-IR: Deep Cyclic Image Retargeting
 This is a Tensorflow implementation of Cycle-IR approach for content-aware image retargeting.
 
 This project includes the source code of TensorFlow implementation for our munuscript of "Cycle-IR: Deep Cyclic Image Retargeting". We demonstrate that image retargeting problem can be solved by using a promising way of unsupervised deep learning.
 
-2. System requirements
+# 2. System requirements
   
-  2.1 Hardware Requirements
+  ## 2.1 Hardware Requirements
 	The package requires only a standard computer with GPU and enough RAM to support the operations defined by a user. 
     For optimal performance, we recommend a computer with the following specs:
     RAM: 32+ GB
     CPU: 8+ cores, 3.6+ GHz/core
     GPU：GeForce RTX 1080 Ti GPU
   
-  2.2 Software Requirements
+  ## 2.2 Software Requirements
       numpy 1.15.4
 	    tensorflow 1.6.0
 	    scipy 1.1.0
