@@ -1,7 +1,7 @@
 # Cycle-IR: Deep Cyclic Image Retargeting
 # 1. Overview
 
-This is a Tensorflow implementation of Cycle-IR approach for content-aware image retargeting.
+This is a Tensorflow implementation of Cycle-IR approach for content-aware image retargeting. The munuscript is available at: https://arxiv.org/abs/1905.03556.
 
 ![](https://github.com/mintanwei/Cycle-IR/blob/master/AdjustmentOfAspectRatio.png)
 
