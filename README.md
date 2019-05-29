@@ -34,7 +34,7 @@ This project includes the source code of TensorFlow implementation for our munus
   
 # 4. Usage of source code
   Download traning data and put it into the folder of "training data"
-  Download VGG-16 model and put it into the folder of "VGG_MODEL" (https://github.com/machrisaa/tensorflow-vgg)
+  Download VGG-16 model and put it into the folder of "VGG_MODEL"
   please be careful of the consistency of these names with the code. These may be some changes to make them consistency.
 
   ## 
