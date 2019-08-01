@@ -9,7 +9,7 @@ dirpath = 'RetargetMeAll/'  # test path
 img_ext = '.png'
 outpath = './test_result'  # test output path
 
-grid_size = 8
+grid_size = 16
 grid_min = 3.0  #16*0.2
 
 VGG_MEAN = [103.939, 116.779, 123.68]
