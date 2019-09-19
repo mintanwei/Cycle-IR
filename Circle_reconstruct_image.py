@@ -5,6 +5,13 @@ from scipy.misc import imread, imshow
 from image_resizing import ResizeImage
 
 
+# def normalizeNP(Vec):
+#     shape = np.shape(Vec)[1]
+#     VecMax = np.tile(np.max(Vec, 1, keepdims=True), [1, shape])
+#     VecMin = np.tile(np.min(Vec, 1, keepdims=True), [1, shape])
+#     return (Vec-VecMin)/(VecMax-VecMin)
+
+
 def preprocess(featH, featW, input_size):
     newH = grid_size * featH
     newW = grid_size * featW
@@ -32,6 +39,8 @@ def resize_images(images, aspect_ratio, input_size, B, M, N, newH, newW):
 
 
 def resize_image(images, aspect_ratio, input_size, M, N, newH, newW, i):
+    M = tf.cast(M, tf.int32)
+    N = tf.cast(N, tf.int32)
     ta_final_result = tf.cond(tf.abs(aspect_ratio[0] - input_size[1]) > 1,
                               lambda: resize_columns(images, M, newH, i),
                               lambda: images)
@@ -50,8 +59,6 @@ def resize_image(images, aspect_ratio, input_size, M, N, newH, newW, i):
 def resize_columns(images, M, newH, i):
     ta = tf.TensorArray(dtype=tf.float32, size=M, infer_shape=False)
     new_size = newH[i]
-    print(new_size)
-    print(newH)
 
     theta = tf.constant([1., 0, 0, 0, 1., 0])
 
@@ -63,7 +70,7 @@ def resize_columns(images, M, newH, i):
         target_shape = tf.cast(tf.shape(images), tf.float32)
         out_dims = [new_size[j], target_shape[1], target_shape[2]]
 
-        new_block = tf.cond(new_size[j] > 0,
+        new_block = tf.cond(new_size[j] >= 1,
                 lambda: ResizeImage(block, theta, out_dims=out_dims),
                 lambda: tf.zeros((0, tf.shape(images)[1], tf.shape(images)[2])))
         return [tf.add(j, 1), ta.write(j, new_block)]
@@ -87,15 +94,15 @@ if __name__ == '__main__':
     print(img.shape)
 
     images = tf.placeholder(tf.float32, shape=(B, H, W, C))
-    featH = tf.Variable(np.random.uniform(-2000, 2000, (B, H/grid_size)), dtype=tf.float32)
-    featW = tf.Variable(np.random.uniform(-2000, 2000, (B, W/grid_size)), dtype=tf.float32)
+    featH = tf.Variable(initial_value=np.random.uniform(low=0.0, high=1.0, size=(B, np.int32(H/grid_size))), dtype=tf.float32)
+    featW = tf.Variable(initial_value=np.random.uniform(low=0.0, high=1.0, size=(B, np.int32(W/grid_size))), dtype=tf.float32)
     input_size = tf.shape(images)
     aspect_ratio = tf.constant([np.round(H / 1.0), W / 3])
 
-    featH = tf.nn.sigmoid(featH)
-    featH = tf.clip_by_value(featH, 0, 1.0)
-    featW = tf.nn.sigmoid(featW)
-    featW = tf.clip_by_value(featW, 0, 1.0)
+    # featH = tf.nn.sigmoid(featH)
+    # featH = tf.clip_by_value(featH, 0, 1.0)
+    # featW = tf.nn.sigmoid(featW)
+    # featW = tf.clip_by_value(featW, 0, 1.0)
 
     ta_final_result = reconstruct_image(images, featH, featW, input_size, aspect_ratio)
 
