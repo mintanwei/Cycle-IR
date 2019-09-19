@@ -7,7 +7,13 @@ from VGG_MODEL import vgg16 as vgg16
 from parameter_define import *
 from scipy.misc import imresize, imread, imsave
 from Circle_reconstruct_image import reconstruct_image
-import time
+
+
+def normalize(Vec):
+    shape = tf.shape(Vec)[1]
+    VecMax = tf.tile(tf.reduce_max(Vec, 1, keep_dims=True), [1, shape])
+    VecMin = tf.tile(tf.reduce_min(Vec, 1, keep_dims=True), [1, shape])
+    return (Vec-VecMin)/(VecMax-VecMin)
 
 
 def CycleIR(images, reuse=False):
@@ -41,11 +47,20 @@ def CycleIR(images, reuse=False):
         final_max = tf.tile(tf.reduce_max(salmap, [1, 2], keep_dims=True), [1, tf.shape(salmap)[1], tf.shape(salmap)[2]])
         AttentionMap = salmap / final_max
 
+        # # Sh and Sw
+        # Sh = tf.squeeze(tf.reduce_mean(AttentionMap, 2))
+        # Sh = tf.reshape(Sh, [tf.shape(images)[0], -1])+0.1
+        # Sw = tf.squeeze(tf.reduce_mean(AttentionMap, 1))
+        # Sw = tf.reshape(Sw, [tf.shape(images)[0], -1])+0.1
+
         # Sh and Sw
         Sh = tf.squeeze(tf.reduce_mean(AttentionMap, 2))
-        Sh = tf.reshape(Sh, [tf.shape(images)[0], -1])+0.1
+        Sh = tf.reshape(Sh, [tf.shape(images)[0], -1])
         Sw = tf.squeeze(tf.reduce_mean(AttentionMap, 1))
-        Sw = tf.reshape(Sw, [tf.shape(images)[0], -1])+0.1
+        Sw = tf.reshape(Sw, [tf.shape(images)[0], -1])
+
+        Sh = normalize(Sh)
+        Sw = normalize(Sw)
     return Sh, Sw, AttentionMap
 
 
@@ -123,29 +138,38 @@ def build_graph():
     return opt_g, aspect_ratio, images, CycleLoss, images_LR, AttentionMap, input_size, Sh, Sw
 
 
-def model_test(sess, images, salmap, images_new, train_step, aspect_ratio, input_size):
-    dirpath = 'test_image/'  # test input path
-    img_ext = '.jpg'
-    outpath = './test_image_result/'  # test output path
+def model_test(sess, images, salmap, images_new, train_step, aspect_ratio, input_size, Sh, Sw):
+    ResizeScale = 0.5
+    dirpath = '/home/user/data/home/ASAP/RetargetMe/' + str(ResizeScale) + '/'  # Vertical_
+    print(dirpath)
+    img_ext = '.png'
+    outpath = './RetargetMeResult/' + str(ResizeScale) + '/'  # Vertical_
 
     img_fnames = [os.path.join(dirpath, x) for x in os.listdir(dirpath) if x.endswith(img_ext)]
     base_fnames = [os.path.splitext(os.path.basename(x))[0] + img_ext for x in img_fnames]
 
     for i, (imgPath, imgName) in enumerate(zip(img_fnames, base_fnames)):
         img = imread(imgPath)
-        img = np.expand_dims(img, 0)
         shape = img.shape
-        target_ratio = ((shape[1], shape[2] * 0.5), (shape[1], shape[2] * 0.75))
 
-        for TR in target_ratio:
-            feed_dict = {images: img, aspect_ratio: TR, input_size: shape}
-            [images_new_, salmap_] = sess.run([images_new, salmap], feed_dict=feed_dict)
-            images_new_ = np.array(images_new_, np.uint8)
-            salmap_ = np.array(salmap_, np.float32)
-            salmap_ = (salmap_ - np.min(salmap_))/(np.max(salmap_) - np.min(salmap_))*255
-            salmap_ = np.array(salmap_, np.uint8)
-            imsave(outpath + str(TR) + '_img_' + imgName, images_new_[0, ...])
-            imsave(outpath + str(TR) + '_sal_' + imgName, imresize(salmap_[0,:,:], [shape[1], shape[2]], 'bicubic'))
+        H = shape[0] - np.mod(shape[0], 8) + 8
+        W = shape[1] - np.mod(shape[1], 8) + 8
+        img = imresize(img, [H, W])
+        img = np.expand_dims(img, 0)
+
+        shape = img.shape
+        TR = shape[1], shape[2] * ResizeScale
+
+        feed_dict = {images: img, aspect_ratio: TR, input_size: shape}
+        [images_new_, salmap_, Sh_, Sw_] = sess.run([images_new, salmap, Sh, Sw], feed_dict=feed_dict)
+        images_new_ = np.array(images_new_, np.uint8)
+        salmap_ = np.array(salmap_, np.float32)
+        salmap_ = (salmap_ - np.min(salmap_))/(np.max(salmap_) - np.min(salmap_))*255
+        salmap_ = np.array(salmap_, np.uint8)
+        imsave(outpath + 'step9299_img_' + imgName[:-4] + '_BiGAN.png', images_new_[0, ...])
+        imsave(outpath + 'step9299_sal_' + imgName[:-4] + '_BiGAN.png', imresize(salmap_[0,:,:], [shape[1], shape[2]], 'bicubic'))
+        print('Sh_:', Sh_)
+        print('Sw_:', Sw_)
 
 
 def restore_from_checkpoint(sess, saver, checkpoint):
@@ -173,7 +197,7 @@ def main(argv=None):
         print('initial successfully!')
 
         restore_from_checkpoint(sess, saver, LATEST_CHECKPOINT)
-        model_test(sess, images, AttentionMap, images_LR, 0, aspect_ratio, input_size)
+        model_test(sess, images, AttentionMap, images_LR, 9999, aspect_ratio, input_size, Sh, Sw)
 
 
 if __name__ == "__main__":
