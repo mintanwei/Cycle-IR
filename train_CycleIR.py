@@ -11,6 +11,13 @@ from data_loader import data_loader
 import glob
 
 
+def normalize(Vec):
+    shape = tf.shape(Vec)[1]
+    VecMax = tf.tile(tf.reduce_max(Vec, 1, keep_dims=True), [1, shape])
+    VecMin = tf.tile(tf.reduce_min(Vec, 1, keep_dims=True), [1, shape])
+    return (Vec-VecMin)/(VecMax-VecMin)
+
+
 def CycleIR(images, reuse=False):
     with tf.variable_scope('CycleIR') as scope:
         if reuse:
@@ -44,9 +51,12 @@ def CycleIR(images, reuse=False):
 
         # Sh and Sw
         Sh = tf.squeeze(tf.reduce_mean(AttentionMap, 2))
-        Sh = tf.reshape(Sh, [tf.shape(images)[0], -1])+0.1
+        Sh = tf.reshape(Sh, [tf.shape(images)[0], -1])
         Sw = tf.squeeze(tf.reduce_mean(AttentionMap, 1))
-        Sw = tf.reshape(Sw, [tf.shape(images)[0], -1])+0.1
+        Sw = tf.reshape(Sw, [tf.shape(images)[0], -1])
+
+        Sh = normalize(Sh)
+        Sw = normalize(Sw)
     return Sh, Sw, AttentionMap
 
 
@@ -130,8 +140,14 @@ def model_test(sess, images, salmap, images_new, train_step, aspect_ratio, input
 
     for i, (imgPath, imgName) in enumerate(zip(img_fnames, base_fnames)):
         img = imread(imgPath)
+        shape = img.shape
+
+        H = shape[0] - np.mod(shape[0], 8) + 8
+        W = shape[1] - np.mod(shape[1], 8) + 8
+        img = imresize(img, [H, W])
         img = np.expand_dims(img, 0)
         shape = img.shape
+
         feed_dict = {images: img, aspect_ratio: [shape[1], shape[2]/2], input_size: shape}
         [images_new_, salmap_] = sess.run([images_new, salmap], feed_dict=feed_dict)
         images_new_ = np.array(images_new_, np.uint8)
@@ -159,7 +175,7 @@ def main(argv=None):
 
     opt_g, aspect_ratio, images, CycleLoss, images_LR, AttentionMap, input_size, Sh, Sw = build_graph()
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=500)
     merged_all = tf.summary.merge_all()
 
     with tf.Session() as sess:
@@ -197,11 +213,9 @@ def main(argv=None):
 
             print("Generator training step {}/{}, generator_loss: {}".format(i, max_iter_step, generator_loss))
 
-            if i % 400 == 399:
+            if i % 200 == 199:
                 model_test(sess, images, AttentionMap, images_LR, i, aspect_ratio, input_size)
-
-            if i % 1000 == 999:
-                saver.save(sess, os.path.join(ckpt_dir, "model.ckpt"), global_step=max_iter_step)
+                saver.save(sess, os.path.join(ckpt_dir, "model.ckpt"), global_step=i)
 
 
 if __name__ == "__main__":
