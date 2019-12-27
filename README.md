@@ -5,6 +5,9 @@ This is a Tensorflow implementation of Cycle-IR approach for content-aware image
 
 ![](https://github.com/mintanwei/Cycle-IR/blob/master/AdjustmentOfAspectRatio.png)
 
+
+The retargeting results  of our approach on RetargetMe dataset is available at the folder "Our Cycle-IR result".
+
 @ARTICLE{CycleIR_TMM2019,
 author={W. {Tan} and B. {Yan} and C. {Lin} and X. {Niu}},
 journal={IEEE Transactions on Multimedia (TMM'2019)},
